@@ -73,8 +73,6 @@ export default function Contato() {
                       <h3 className="font-semibold text-lg mb-2">E-mail</h3>
                       <p className="text-muted-foreground">
                         contato@eurobombas.com.br
-                        <br />
-                        vendas@eurobombas.com.br
                       </p>
                     </div>
                   </div>
@@ -83,8 +81,7 @@ export default function Contato() {
 
               <div>
                 <h3 className="font-semibold text-lg mb-4">Horário de Atendimento</h3>
-                <p className="text-muted-foreground mb-2">Segunda a Sexta: 8h às 18h</p>
-                <p className="text-muted-foreground">Sábado: 8h às 12h</p>
+                <p className="text-muted-foreground mb-2">Segunda a Sexta: 8h às 18h</p>                
               </div>
             </div>
 

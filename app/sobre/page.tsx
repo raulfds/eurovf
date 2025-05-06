@@ -18,7 +18,7 @@ export default function SobreNos() {
             </div>
             <div className="relative h-[300px] md:h-[400px] rounded-lg overflow-hidden">
               <Image
-                src="/placeholder.svg?height=800&width=1200"
+                src="https://i.ibb.co/sdQ9L3mn/place-Euro.png"
                 alt="Sede da Eurobombas"
                 fill
                 className="object-cover"
@@ -53,7 +53,7 @@ export default function SobreNos() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
               <div className="flex flex-col items-center text-center">
-                <div className="text-4xl font-bold text-primary mb-2">20+</div>
+                <div className="text-4xl font-bold text-primary mb-2">10+</div>
                 <p className="text-muted-foreground">Anos de experiência</p>
               </div>
               <div className="flex flex-col items-center text-center">
@@ -61,7 +61,7 @@ export default function SobreNos() {
                 <p className="text-muted-foreground">Clientes atendidos</p>
               </div>
               <div className="flex flex-col items-center text-center">
-                <div className="text-4xl font-bold text-primary mb-2">300+</div>
+                <div className="text-4xl font-bold text-primary mb-2">100+</div>
                 <p className="text-muted-foreground">Modelos de bombas</p>
               </div>
             </div>

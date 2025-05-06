@@ -45,7 +45,7 @@ export default function Home() {
             </div>
             <div className="hidden md:block">
               <Image
-                src="/placeholder.svg?height=600&width=600"
+                src="https://i.ibb.co/sdQ9L3mn/place-Euro.png"
                 alt="Bomba hidráulica"
                 width={600}
                 height={600}
@@ -183,7 +183,7 @@ export default function Home() {
               <div className="product-card rounded-lg overflow-hidden border">
                 <div className="aspect-square relative">
                   <Image
-                    src="https://d26pdq3f5wxbiy.cloudfront.net/Custom/Content/Products/10/86/1086053_pressurizador-eurobombas-epa-15-9-160-120w-monofasico-110v-p01f004m252005_z2_638411917096297814.jpg"
+                    src="https://d26pdq3f5wxbiy.cloudfront.net/Custom/Content/Products/10/89/1089506_pressurizador-eurobombas-ultra-press-eb-29-1-2cv-ip65-monofasico-220v-p01f004m252023_z1_638675390221518752.jpg"
                     alt="Pressurizadores"
                     fill
                     className="object-cover transition-transform group-hover:scale-105"
