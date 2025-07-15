@@ -245,7 +245,11 @@ export default function Produtos() {
                     product.imagem_url_7,
                   ].filter((url): url is string => Boolean(url)).map(url => url.trim());
                   return (
-                    <div key={product.id} onClick={() => router.push(`/produtos/${product.id}`)}>
+                    <div
+                      key={product.id}
+                      onClick={() => router.push(`/produtos/${product.id}`)}
+                      onMouseEnter={() => router.prefetch(`/produtos/${product.id}`)}
+                    >
                       <Card className="product-card h-full border-2 border-transparent hover:border-primary cursor-pointer">
                         <CardContent className="p-3 md:p-4">
                           <div className="aspect-square relative mb-3 md:mb-4 bg-muted rounded-md overflow-hidden">
@@ -257,29 +261,7 @@ export default function Produtos() {
                             />
                           </div>
                           {/* Miniaturas */}
-                          {thumbnails.length > 1 && (
-                            <div className="flex gap-2 mb-3">
-                              {thumbnails.map((thumb, idx) => (
-                                <button
-                                  key={idx}
-                                  type="button"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    setMainImages((prev) => ({ ...prev, [product.id]: thumb }));
-                                  }}
-                                  className={`w-10 h-10 rounded border-2 ${mainImages[product.id] === thumb ? 'border-primary' : 'border-border/40'} overflow-hidden bg-white`}
-                                >
-                                  <Image
-                                    src={thumb}
-                                    alt={`Miniatura ${idx + 1}`}
-                                    width={40}
-                                    height={40}
-                                    className="object-cover"
-                                  />
-                                </button>
-                              ))}
-                            </div>
-                          )}
+                          {/* Removido bloco de miniaturas da listagem */}
                           <div>
                             <h3 className="font-semibold text-base md:text-lg mb-1 line-clamp-1">{product.modelo}</h3>
                             <p className="text-xs md:text-sm text-muted-foreground mb-2">Cód: {product.codigo_interno}</p>
