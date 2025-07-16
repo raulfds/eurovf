@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Search, Filter, X } from "lucide-react"
-import produtosData from "@/data/produtos.json"
+import { supabase } from '@/lib/supabaseClient';
 
 // Define the Product type based on our JSON structure
 type Product = {
@@ -56,7 +56,8 @@ export default function Produtos() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [searchTerm, setSearchTerm] = useState("")
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(produtosData)
+  const [produtos, setProdutos] = useState<Product[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
     categoria: searchParams.get("categoria") || "",
@@ -66,19 +67,32 @@ export default function Produtos() {
   // Estado para imagem principal de cada produto
   const [mainImages, setMainImages] = useState<{ [id: string]: string }>({})
 
-  // Atualiza o estado das imagens principais quando os produtos filtrados mudam
+  // Buscar produtos do Supabase ao montar
   useEffect(() => {
-    const initialImages: { [id: string]: string } = {}
-    produtosData.forEach((product) => {
-      initialImages[product.id] = product.imagem_url?.trim() || ""
-    })
-    setMainImages(initialImages)
+    async function fetchProdutos() {
+      const { data, error } = await supabase
+        .from('produtos')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && data) {
+        setProdutos(data)
+        setFilteredProducts(data)
+        // Atualiza o estado das imagens principais
+        const initialImages: { [id: string]: string } = {}
+        data.forEach((product) => {
+          initialImages[product.id] = product.imagem_url?.trim() || ""
+        })
+        setMainImages(initialImages)
+      }
+    }
+    fetchProdutos();
   }, [])
 
+  // Filtrar produtos ao alterar busca/filtros
   useEffect(() => {
-    const results = produtosData.filter((product) => {
+    const results = produtos.filter((product) => {
       const matchesSearch = Object.values(product).some(
-        (value) => typeof value === "string"&& value.toLowerCase().includes(searchTerm.toLowerCase()),
+        (value) => typeof value === "string" && value.toLowerCase().includes(searchTerm.toLowerCase()),
       )
       const matchesCategory = filters.categoria ? product.categoria === filters.categoria : true
       const matchesVoltagem = filters.voltagem ? product.voltagem?.includes(filters.voltagem) : true
@@ -96,7 +110,7 @@ export default function Produtos() {
       })
       return updated
     })
-  }, [searchTerm, filters])
+  }, [searchTerm, filters, produtos])
 
   // Reset all filters
   const resetFilters = () => {
@@ -109,9 +123,9 @@ export default function Produtos() {
   }
 
   // Get unique values for filter dropdowns
-  const categorias = [...new Set(produtosData.map((p) => p.categoria))].sort()
-  const voltagens = [...new Set(produtosData.map((p) => p.voltagem).filter(Boolean))]
-  const potencias = [...new Set(produtosData.map((p) => p.potencia_saida).filter(Boolean))]
+  const categorias = [...new Set(produtos.map((p) => p.categoria))].sort()
+  const voltagens = [...new Set(produtos.map((p) => p.voltagem).filter(Boolean))]
+  const potencias = [...new Set(produtos.map((p) => p.potencia_saida).filter(Boolean))]
 
   return (
     <div className="flex flex-col min-h-screen">

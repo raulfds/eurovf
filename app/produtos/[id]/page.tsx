@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ChevronLeft } from "lucide-react"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { ImageZoom } from "@/components/ui/image-zoom"
-import produtosData from "@/data/produtos.json"
+import { supabase } from "@/lib/supabaseClient"
 
 export default function ProdutoDetalhe() {
   const router = useRouter()
@@ -17,17 +17,35 @@ export default function ProdutoDetalhe() {
   const [produto, setProduto] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<"especificacoes"| "detalhes">("especificacoes")
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [produtosRelacionados, setProdutosRelacionados] = useState<any[]>([]);
 
   useEffect(() => {
-    if (id) {
-      const foundProduto = produtosData.find((p) => p.id === id)
-      if (foundProduto) {
-        setProduto(foundProduto)
-      } else {
-        router.push("/not-found")
+    async function fetchProduto() {
+      if (id) {
+        const { data, error } = await supabase
+          .from("produtos")
+          .select("*")
+          .eq("id", id)
+          .single();
+        if (data) {
+          setProduto(data);
+          // Buscar produtos relacionados
+          if (data.categoria) {
+            const { data: relacionados } = await supabase
+              .from("produtos")
+              .select("*")
+              .eq("categoria", data.categoria)
+              .neq("id", id)
+              .limit(4);
+            setProdutosRelacionados(relacionados || []);
+          }
+        } else {
+          router.push("/not-found");
+        }
       }
     }
-  }, [id, router])
+    fetchProduto();
+  }, [id, router]);
 
   if (!produto) {
     return (
@@ -303,10 +321,8 @@ export default function ProdutoDetalhe() {
         <h2 className="text-2xl font-bold mb-6">Produtos Relacionados</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {produtosData
-            .filter((p) => p.categoria === produto.categoria && p.id !== produto.id)
-            .slice(0, 4)
-            .map((product) => (
+          {produtosRelacionados.length > 0 ? (
+            produtosRelacionados.map((product) => (
               <div key={product.id} onClick={() => router.push(`/produtos/${product.id}`)}>
                 <Card className="product-card h-full border-2 border-transparent hover:border-primary cursor-pointer">
                   <CardContent className="p-4">
@@ -326,7 +342,12 @@ export default function ProdutoDetalhe() {
                   </CardContent>
                 </Card>
               </div>
-            ))}
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p>Nenhum produto relacionado encontrado.</p>
+            </div>
+          )}
         </div>
       </section>
     </div>
