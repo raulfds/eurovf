@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 
   try {
     await resend.emails.send({
-      from: 'Contato Eurobombas <contato@eurobombas.com.br>',
+      from: 'onboarding@resend.dev',
       to: 'raulferreiradesouza@gmail.com',
       subject: subject || 'Nova mensagem de contato',
       html: `
