@@ -7,9 +7,38 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Mail, MapPin, Phone } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react";
 
 export default function Contato() {
-  const router = useRouter()
+  const router = useRouter();
+  const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess("");
+    setError("");
+    try {
+      const res = await fetch("/api/contato", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuccess("Mensagem enviada com sucesso!");
+        setForm({ name: "", email: "", phone: "", subject: "", message: "" });
+      } else {
+        setError("Erro ao enviar mensagem. Tente novamente.");
+      }
+    } catch {
+      setError("Erro ao enviar mensagem. Tente novamente.");
+    }
+    setLoading(false);
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -90,36 +119,39 @@ export default function Contato() {
               <Card className="border-2 border-border/40">
                 <CardContent className="p-6">
                   <h2 className="text-2xl font-bold mb-6">Envie sua mensagem</h2>
-                  <form className="space-y-6">
+                  <form className="space-y-6" onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="name">Nome</Label>
-                        <Input id="name"placeholder="Seu nome completo"/>
+                        <Input id="name" name="name" placeholder="Seu nome completo" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="email">E-mail</Label>
-                        <Input id="email"type="email"placeholder="seu@email.com"/>
+                        <Input id="email" name="email" type="email" placeholder="seu@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="phone">Telefone</Label>
-                        <Input id="phone"placeholder="(00) 00000-0000"/>
+                        <Input id="phone" name="phone" placeholder="(00) 00000-0000" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="subject">Assunto</Label>
-                        <Input id="subject"placeholder="Assunto da mensagem"/>
+                        <Input id="subject" name="subject" placeholder="Assunto da mensagem" value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} />
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="message">Mensagem</Label>
-                      <Textarea id="message"placeholder="Digite sua mensagem"rows={6} />
+                      <Textarea id="message" name="message" placeholder="Digite sua mensagem" rows={6} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} required />
                     </div>
 
-                    <Button type="submit"className="w-full md:w-auto">
-                      Enviar Mensagem
+                    {success && <div className="text-green-600 font-medium">{success}</div>}
+                    {error && <div className="text-red-600 font-medium">{error}</div>}
+
+                    <Button type="submit" className="w-full md:w-auto" disabled={loading}>
+                      {loading ? "Enviando..." : "Enviar Mensagem"}
                     </Button>
                   </form>
                 </CardContent>

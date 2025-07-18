@@ -5,9 +5,45 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, Droplet, Settings, Zap } from "lucide-react"
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { useEffect, useState, useRef } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Home() {
   const router = useRouter()
+  const [lancamentos, setLancamentos] = useState<string[]>([]);
+  const carouselRef = useRef<any>(null);
+
+  useEffect(() => {
+    async function fetchLancamentos() {
+      const { data, error } = await supabase
+        .from("produtos")
+        .select("imagem_url, created_at")
+        .order("created_at", { ascending: false })
+        .limit(3);
+      if (!error && data) {
+        setLancamentos(data.map(p => p.imagem_url).filter(Boolean));
+      }
+    }
+    fetchLancamentos();
+  }, []);
+
+  // Autoplay
+  useEffect(() => {
+    if (!carouselRef.current) return;
+    const interval = setInterval(() => {
+      if (carouselRef.current && carouselRef.current.next) {
+        carouselRef.current.next();
+      }
+    }, 3500); // 3.5 segundos
+    return () => clearInterval(interval);
+  }, [lancamentos]);
+
+  const imagensSlider = [
+    "https://i.ibb.co/3yy6LGmt/042dd305-8fc6-4e73-963a-b737bb196e9a-1.png",
+    ...lancamentos
+  ];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -44,13 +80,24 @@ export default function Home() {
               </div>
             </div>
             <div className="hidden md:block">
-              <Image
-                src="https://i.ibb.co/sdQ9L3mn/place-Euro.png"
-                alt="Bomba hidráulica"
-                width={600}
-                height={600}
-                className="rounded-lg shadow-xl"
-              />
+              <div className="relative">
+                <Carousel ref={carouselRef}>
+                  <CarouselContent>
+                    {imagensSlider.map((url, idx) => (
+                      <CarouselItem key={idx}>
+                        <div className="relative">
+                          <img src={url} alt={`Lançamento ${idx + 1}`} className="rounded-lg shadow-xl max-h-[600px] w-full object-cover mx-auto" />
+                          {idx !== 0 && (
+                            <span className="absolute top-4 left-4 bg-primary text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">Lançamento</span>
+                          )}
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                </Carousel>
+              </div>
             </div>
           </div>
         </div>

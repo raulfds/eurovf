@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 const camposIniciais = {
   codigo_interno: "",
@@ -21,13 +22,7 @@ const camposIniciais = {
   ciclo: "",
   corrente_maxima: "",
   rede_eletrica: "",
-  imagem_url: "",
-  imagem_url_2: "",
-  imagem_url_3: "",
-  imagem_url_4: "",
-  imagem_url_5: "",
-  imagem_url_6: "",
-  imagem_url_7: ""
+  imagens: [""]
 };
 
 export default function CadastroProduto() {
@@ -40,12 +35,35 @@ export default function CadastroProduto() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  function handleImageChange(index: number, value: string) {
+    const novasImagens = [...form.imagens];
+    novasImagens[index] = value;
+    setForm({ ...form, imagens: novasImagens });
+  }
+
+  function adicionarImagem() {
+    setForm({ ...form, imagens: [...form.imagens, ""] });
+  }
+
+  function removerImagem(index: number) {
+    const novasImagens = form.imagens.filter((_, i) => i !== index);
+    setForm({ ...form, imagens: novasImagens });
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    // Integração com Supabase
-    const { error } = await supabase.from("produtos").insert([{ ...form }]);
+    // Monta os campos imagem_url, imagem_url_2, ...
+    const imagensObj: Record<string, string> = {};
+    form.imagens.forEach((url, i) => {
+      imagensObj[`imagem_url${i === 0 ? "" : "_" + (i + 1)}`] = url;
+    });
+    const produto = { ...form, ...imagensObj };
+    if ('imagens' in produto) {
+      delete (produto as any).imagens;
+    }
+    const { error } = await supabase.from("produtos").insert([produto]);
     setLoading(false);
     if (error) {
       setError("Erro ao cadastrar produto: " + error.message);
@@ -127,34 +145,35 @@ export default function CadastroProduto() {
             <label className="block mb-1 font-medium">Rede Elétrica</label>
             <input name="rede_eletrica" value={form.rede_eletrica} onChange={handleChange} className="w-full border rounded px-3 py-2" />
           </div>
-          <div className="col-span-2">
-            <label className="block mb-1 font-medium">URL da Imagem 1</label>
-            <input name="imagem_url" value={form.imagem_url} onChange={handleChange} className="w-full border rounded px-3 py-2" />
-          </div>
-          <div className="col-span-2">
-            <label className="block mb-1 font-medium">URL da Imagem 2</label>
-            <input name="imagem_url_2" value={form.imagem_url_2} onChange={handleChange} className="w-full border rounded px-3 py-2" />
-          </div>
-          <div className="col-span-2">
-            <label className="block mb-1 font-medium">URL da Imagem 3</label>
-            <input name="imagem_url_3" value={form.imagem_url_3} onChange={handleChange} className="w-full border rounded px-3 py-2" />
-          </div>
-          <div className="col-span-2">
-            <label className="block mb-1 font-medium">URL da Imagem 4</label>
-            <input name="imagem_url_4" value={form.imagem_url_4} onChange={handleChange} className="w-full border rounded px-3 py-2" />
-          </div>
-          <div className="col-span-2">
-            <label className="block mb-1 font-medium">URL da Imagem 5</label>
-            <input name="imagem_url_5" value={form.imagem_url_5} onChange={handleChange} className="w-full border rounded px-3 py-2" />
-          </div>
-          <div className="col-span-2">
-            <label className="block mb-1 font-medium">URL da Imagem 6</label>
-            <input name="imagem_url_6" value={form.imagem_url_6} onChange={handleChange} className="w-full border rounded px-3 py-2" />
-          </div>
-          <div className="col-span-2">
-            <label className="block mb-1 font-medium">URL da Imagem 7</label>
-            <input name="imagem_url_7" value={form.imagem_url_7} onChange={handleChange} className="w-full border rounded px-3 py-2" />
-          </div>
+        </div>
+        <div className="col-span-2">
+          <label className="block mb-1 font-medium">Imagens do Produto</label>
+          {form.imagens.map((url, idx) => (
+            <div key={idx} className="flex gap-2 mb-2">
+              <input
+                type="text"
+                className="w-full border rounded px-3 py-2"
+                placeholder={`URL da Imagem ${idx + 1}`}
+                value={url}
+                onChange={e => handleImageChange(idx, e.target.value)}
+              />
+              {form.imagens.length > 1 && (
+                <button type="button" onClick={() => removerImagem(idx)} className="text-red-600 font-bold">X</button>
+              )}
+            </div>
+          ))}
+          <button type="button" onClick={adicionarImagem} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition">Adicionar Imagem</button>
+        </div>
+        <div className="hidden md:block col-span-2 mt-6">
+          <Carousel>
+            <CarouselContent>
+              {form.imagens.filter(Boolean).map((url, idx) => (
+                <CarouselItem key={idx}>
+                  <img src={url} alt={`Imagem ${idx + 1}`} className="max-h-64 mx-auto" />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
         </div>
         {error && <div className="mb-4 text-red-600 text-sm">{error}</div>}
         <button
